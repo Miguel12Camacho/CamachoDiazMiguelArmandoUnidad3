@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tienda Digital: catálogo, cuenta de usuario y carrito de compras.">
+  <title>Tienda Digital | Compra fácil</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Tienda Digital, inicio"><span class="brand-mark">T</span> Tienda<span>Digital</span></a>
+    <form id="search-form" class="search" role="search">
+      <label class="sr-only" for="search-input">Buscar productos</label>
+      <input id="search-input" type="search" placeholder="Buscar en Tienda Digital">
+      <button aria-label="Buscar">⌕</button>
+    </form>
+    <div class="header-actions">
+      <button id="account-open" class="nav-button">Mi cuenta</button>
+      <button id="cart-open" class="nav-button cart-button">Carrito <span id="cart-count">0</span></button>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">TU DÍA, MÁS FÁCIL</p>
+        <h1>Encuentra algo<br><span>que te encante.</span></h1>
+        <p>Productos útiles para estudiar, trabajar y disfrutar tu día.</p>
+        <a class="primary-link" href="#catalogo">Explorar productos <span>→</span></a>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div><div class="orb orb-one"></div><div class="orb orb-two"></div>
+        <div class="hero-card"><span>SELECCIÓN</span><strong>Pequeños<br>gustos,<br>grandes días.</strong><div class="hero-card-bottom">TD / 2026 <span>✳</span></div></div>
+      </div>
+    </section>
+    <section class="benefits" aria-label="Ventajas">
+      <div><span class="benefit-icon">◇</span><p><strong>Compra sencilla</strong><small>Explora sin complicaciones</small></p></div>
+      <div><span class="benefit-icon">↗</span><p><strong>Selección práctica</strong><small>Para tu vida cotidiana</small></p></div>
+      <div><span class="benefit-icon">♡</span><p><strong>Tu espacio personal</strong><small>Cuenta y carrito privados</small></p></div>
+    </section>
+    <section id="catalogo" class="catalog section-wrap">
+      <div class="section-heading"><div><p class="eyebrow">DESCUBRE</p><h2>Productos destacados</h2></div><p id="catalog-status" class="muted">Cargando catálogo…</p></div>
+      <div id="product-grid" class="product-grid"></div>
+      <p id="catalog-error" class="notice hidden"></p>
+    </section>
+    <section class="newsletter section-wrap">
+      <div><p class="eyebrow">¿TIENES UNA DUDA?</p><h2>Estamos para ayudarte.</h2><p>Envíanos un mensaje y nos pondremos en contacto.</p></div>
+      <form id="contact-form" class="contact-form">
+        <label>Nombre<input name="name" required minlength="2" maxlength="80" placeholder="Tu nombre"></label>
+        <label>Correo electrónico<input name="email" type="email" required placeholder="tu@correo.com"></label>
+        <label>Mensaje<textarea name="message" required minlength="5" maxlength="2000" rows="3" placeholder="¿Cómo podemos ayudarte?"></textarea></label>
+        <button class="primary-button" type="submit">Enviar mensaje</button>
+        <p id="contact-status" class="form-status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <footer><a class="brand footer-brand" href="/">Tienda<span>Digital</span></a><p>Una tienda de ejemplo creada para el proyecto académico de Unidad 3.</p><span>© 2026 Tienda Digital</span></footer>
+
+  <dialog id="account-dialog" class="modal">
+    <button class="close-modal" data-close="account-dialog" aria-label="Cerrar">×</button>
+    <div id="account-view">
+      <p class="eyebrow">BIENVENIDO</p><h2>Tu cuenta</h2>
+      <div class="tabs"><button class="tab active" data-mode="login">Iniciar sesión</button><button class="tab" data-mode="register">Crear cuenta</button></div>
+      <form id="auth-form">
+        <div id="name-field" class="hidden"><label>Nombre<input name="name" autocomplete="name" minlength="2" maxlength="80"></label></div>
+        <label>Correo electrónico<input name="email" type="email" required autocomplete="email"></label>
+        <label>Contraseña<input name="password" type="password" required minlength="10" maxlength="72" autocomplete="current-password"></label>
+        <p class="hint">Usa una contraseña de al menos 10 caracteres.</p>
+        <button class="primary-button full" type="submit" id="auth-submit">Iniciar sesión</button>
+        <p id="auth-status" class="form-status" aria-live="polite"></p>
+      </form>
+      <p class="security-note">Tus contraseñas se almacenan como hash en el servidor; nunca se muestran en pantalla.</p>
+    </div>
+    <div id="account-signed" class="hidden"><p class="eyebrow">CUENTA ACTIVA</p><h2>¡Hola, <span id="signed-name"></span>!</h2><p id="signed-email" class="muted"></p><button id="logout-button" class="primary-button full">Cerrar sesión</button><p id="logout-status" class="form-status"></p></div>
+  </dialog>
+
+  <dialog id="cart-dialog" class="modal cart-modal">
+    <button class="close-modal" data-close="cart-dialog" aria-label="Cerrar">×</button>
+    <p class="eyebrow">TU SELECCIÓN</p><h2>Carrito de compras</h2>
+    <div id="cart-content"><p class="muted">Inicia sesión para consultar tu carrito.</p></div>
+    <p id="cart-status" class="form-status" aria-live="polite"></p>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
