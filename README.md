@@ -4,10 +4,14 @@ Aplicación web académica de comercio electrónico desarrollada con Node.js, Ex
 
 ## Funciones
 
-- Catálogo de productos desde PostgreSQL y búsqueda en el navegador.
+- Catálogo de productos desde PostgreSQL con búsqueda, filtros por categoría y ordenamiento.
+- Detalle de producto con productos relacionados.
+- Favoritos guardados por usuario.
 - Registro e inicio de sesión con contraseñas almacenadas mediante bcrypt.
 - Sesiones con cookies `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
-- Carrito de compras guardado en la base de datos y vinculado al usuario autenticado.
+- Carrito guardado en la base de datos con cantidades editables, envío calculado y opción de vaciarlo.
+- Confirmación de pedidos (simulada, sin pagos) con descuento de existencias en una transacción.
+- Historial de pedidos por usuario.
 - API propia con rutas `/api/...`.
 - Cabeceras de seguridad con Helmet y limitación de solicitudes en rutas de API/autenticación.
 - Servicio externo SMTP opcional (para habilitarlo se requieren credenciales propias).
@@ -38,7 +42,7 @@ Aplicación web académica de comercio electrónico desarrollada con Node.js, Ex
    ```
    En Windows también puedes copiar el archivo desde el Explorador. Define un `SESSION_SECRET` largo y aleatorio.
 4. Crea una base de datos llamada `tienda_digital`.
-5. Ejecuta el esquema y los datos de ejemplo:
+5. Ejecuta el esquema y los datos de ejemplo (puedes volver a ejecutarlo en una base existente para agregar las tablas y columnas nuevas):
    ```bash
    psql -U postgres -d tienda_digital -f sql/schema.sql
    ```
@@ -61,7 +65,14 @@ Aplicación web académica de comercio electrónico desarrollada con Node.js, Ex
 | GET | `/api/auth/me` | Consulta la cuenta actual | Sesión |
 | GET | `/api/cart` | Consulta el carrito del usuario | Sesión |
 | POST | `/api/cart` | Agrega producto al carrito | Sesión |
+| PUT | `/api/cart/:productId` | Cambia la cantidad de un producto | Sesión |
 | DELETE | `/api/cart/:productId` | Quita un producto del carrito | Sesión |
+| DELETE | `/api/cart` | Vacía el carrito | Sesión |
+| GET | `/api/favorites` | Lista los ids de productos favoritos | Sesión |
+| POST | `/api/favorites/:productId` | Agrega un favorito | Sesión |
+| DELETE | `/api/favorites/:productId` | Quita un favorito | Sesión |
+| POST | `/api/orders` | Confirma el carrito como pedido | Sesión |
+| GET | `/api/orders` | Historial de pedidos | Sesión |
 | POST | `/api/contact` | Envía mensaje mediante SMTP | Público, requiere SMTP configurado |
 
 ### Ejemplos de prueba

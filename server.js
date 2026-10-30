@@ -12,6 +12,8 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const isProduction = process.env.NODE_ENV === "production";
+const FREE_SHIPPING_FROM = 999;
+const SHIPPING_COST = 79;
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
@@ -78,6 +80,9 @@ function requireAuth(req, res, next) {
 function validEmail(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
 }
+function calculateShipping(subtotal) {
+  return subtotal >= FREE_SHIPPING_FROM ? 0 : SHIPPING_COST;
+}
 function publicUser(user) {
   return { id: user.id, name: user.name, email: user.email };
 }
@@ -85,14 +90,14 @@ function publicUser(user) {
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "tienda-digital", timestamp: new Date().toISOString() }));
 
 app.get("/api/products", apiLimiter, asyncRoute(async (req, res) => {
-  const result = await pool.query("SELECT id, name, description, price, image, stock FROM products WHERE active = TRUE ORDER BY id");
+  const result = await pool.query("SELECT id, name, description, price, image, stock, category FROM products WHERE active = TRUE ORDER BY id");
   res.json({ data: result.rows });
 }));
 
 app.get("/api/products/:id", apiLimiter, asyncRoute(async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return res.status(400).json({ error: "Identificador inválido." });
-  const result = await pool.query("SELECT id, name, description, price, image, stock FROM products WHERE id = $1 AND active = TRUE", [id]);
+  const result = await pool.query("SELECT id, name, description, price, image, stock, category FROM products WHERE id = $1 AND active = TRUE", [id]);
   if (!result.rowCount) return res.status(404).json({ error: "Producto no encontrado." });
   res.json({ data: result.rows[0] });
 }));
@@ -156,7 +161,7 @@ app.get("/api/auth/me", (req, res) => {
 
 app.get("/api/cart", requireAuth, asyncRoute(async (req, res) => {
   const result = await pool.query(
-    `SELECT c.product_id, p.name, p.price, p.image, c.quantity,
+    `SELECT c.product_id, p.name, p.price, p.image, p.stock, c.quantity,
             (p.price * c.quantity)::numeric(12,2) AS subtotal
      FROM cart_items c JOIN products p ON p.id = c.product_id
      WHERE c.user_id = $1 ORDER BY p.name`,
@@ -191,7 +196,109 @@ app.delete("/api/cart/:productId", requireAuth, asyncRoute(async (req, res) => {
   res.json({ message: "Producto eliminado del carrito." });
 }));
 
-// Integración externa opcional: SMTP. En desarrollo, sin credenciales, se informa que no está configurado.
+app.put("/api/cart/:productId", requireAuth, asyncRoute(async (req, res) => {
+  const productId = Number(req.params.productId);
+  const quantity = Number(req.body.quantity);
+  if (!Number.isInteger(productId) || productId < 1 || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
+    return res.status(400).json({ error: "Producto o cantidad inválidos." });
+  }
+  const product = await pool.query("SELECT stock FROM products WHERE id = $1 AND active = TRUE", [productId]);
+  if (!product.rowCount) return res.status(404).json({ error: "Producto no encontrado." });
+  if (quantity > product.rows[0].stock) return res.status(409).json({ error: "No hay existencias suficientes." });
+  const result = await pool.query(
+    "UPDATE cart_items SET quantity = $1 WHERE user_id = $2 AND product_id = $3",
+    [quantity, req.session.user.id, productId]
+  );
+  if (!result.rowCount) return res.status(404).json({ error: "El producto no está en tu carrito." });
+  res.json({ message: "Cantidad actualizada." });
+}));
+
+app.delete("/api/cart", requireAuth, asyncRoute(async (req, res) => {
+  await pool.query("DELETE FROM cart_items WHERE user_id = $1", [req.session.user.id]);
+  res.json({ message: "Carrito vaciado." });
+}));
+
+app.get("/api/favorites", requireAuth, asyncRoute(async (req, res) => {
+  const result = await pool.query("SELECT product_id FROM favorites WHERE user_id = $1 ORDER BY created_at DESC", [req.session.user.id]);
+  res.json({ data: result.rows.map(row => Number(row.product_id)) });
+}));
+
+app.post("/api/favorites/:productId", requireAuth, asyncRoute(async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!Number.isInteger(productId) || productId < 1) return res.status(400).json({ error: "Identificador inválido." });
+  const product = await pool.query("SELECT id FROM products WHERE id = $1 AND active = TRUE", [productId]);
+  if (!product.rowCount) return res.status(404).json({ error: "Producto no encontrado." });
+  await pool.query(
+    "INSERT INTO favorites (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    [req.session.user.id, productId]
+  );
+  res.status(201).json({ message: "Agregado a favoritos." });
+}));
+
+app.delete("/api/favorites/:productId", requireAuth, asyncRoute(async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!Number.isInteger(productId) || productId < 1) return res.status(400).json({ error: "Identificador inválido." });
+  await pool.query("DELETE FROM favorites WHERE user_id = $1 AND product_id = $2", [req.session.user.id, productId]);
+  res.json({ message: "Quitado de favoritos." });
+}));
+
+app.post("/api/orders", requireAuth, asyncRoute(async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const cart = await client.query(
+      `SELECT c.product_id, c.quantity, p.name, p.price, p.stock
+       FROM cart_items c JOIN products p ON p.id = c.product_id
+       WHERE c.user_id = $1 AND p.active = TRUE
+       ORDER BY p.id FOR UPDATE OF p`,
+      [req.session.user.id]
+    );
+    if (!cart.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ error: "Tu carrito está vacío." });
+    }
+    const unavailable = cart.rows.find(item => item.quantity > item.stock);
+    if (unavailable) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({ error: `No hay existencias suficientes de ${unavailable.name}.` });
+    }
+    const subtotal = cart.rows.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
+    const total = subtotal + calculateShipping(subtotal);
+    const order = await client.query(
+      "INSERT INTO orders (user_id, total) VALUES ($1, $2) RETURNING id, total, status, created_at",
+      [req.session.user.id, total.toFixed(2)]
+    );
+    for (const item of cart.rows) {
+      await client.query(
+        "INSERT INTO order_items (order_id, product_id, name, price, quantity) VALUES ($1, $2, $3, $4, $5)",
+        [order.rows[0].id, item.product_id, item.name, item.price, item.quantity]
+      );
+      await client.query("UPDATE products SET stock = stock - $1 WHERE id = $2", [item.quantity, item.product_id]);
+    }
+    await client.query("DELETE FROM cart_items WHERE user_id = $1", [req.session.user.id]);
+    await client.query("COMMIT");
+    res.status(201).json({ message: "Pedido confirmado.", order: order.rows[0] });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}));
+
+app.get("/api/orders", requireAuth, asyncRoute(async (req, res) => {
+  const result = await pool.query(
+    `SELECT o.id, o.total, o.status, o.created_at,
+            COALESCE(json_agg(json_build_object('name', i.name, 'price', i.price, 'quantity', i.quantity) ORDER BY i.id)
+                     FILTER (WHERE i.id IS NOT NULL), '[]') AS items
+     FROM orders o LEFT JOIN order_items i ON i.order_id = o.id
+     WHERE o.user_id = $1
+     GROUP BY o.id ORDER BY o.created_at DESC LIMIT 20`,
+    [req.session.user.id]
+  );
+  res.json({ data: result.rows });
+}));
+
 app.post("/api/contact", apiLimiter, asyncRoute(async (req, res) => {
   const name = String(req.body.name || "").trim().slice(0, 80);
   const email = String(req.body.email || "").trim();
@@ -238,4 +345,4 @@ async function start() {
 }
 if (require.main === module) start();
 
-module.exports = { app, pool, validEmail };
+module.exports = { app, pool, validEmail, calculateShipping };

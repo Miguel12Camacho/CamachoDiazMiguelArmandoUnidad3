@@ -55,7 +55,7 @@
           <a class="btn btn-ghost" href="#contacto">Hablar con nosotros</a>
         </div>
         <ul class="hero-stats" aria-label="Datos de la tienda">
-          <li><strong>6</strong><span>productos seleccionados</span></li>
+          <li><strong id="stat-products">–</strong><span>productos seleccionados</span></li>
           <li><strong>100%</strong><span>cuenta protegida</span></li>
           <li><strong>24/7</strong><span>carrito siempre guardado</span></li>
         </ul>
@@ -107,6 +107,7 @@
           </label>
         </div>
       </div>
+      <div id="category-filters" class="chips" role="group" aria-label="Filtrar por categoría"></div>
       <div id="product-grid" class="product-grid" aria-busy="true"></div>
       <p id="catalog-error" class="notice hidden" role="alert"></p>
     </section>
@@ -116,9 +117,9 @@
         <div><p class="eyebrow">Cómo funciona</p><h2>Comprar en tres pasos</h2></div>
       </div>
       <ol class="steps-list">
-        <li><span class="step-num">1</span><h3>Explora</h3><p>Busca por nombre y ordena el catálogo por precio.</p></li>
+        <li><span class="step-num">1</span><h3>Explora</h3><p>Busca por nombre, filtra por categoría y guarda tus favoritos.</p></li>
         <li><span class="step-num">2</span><h3>Crea tu cuenta</h3><p>Regístrate para guardar tu carrito en tu espacio privado.</p></li>
-        <li><span class="step-num">3</span><h3>Revisa tu carrito</h3><p>Consulta cantidades y total estimado antes de decidir.</p></li>
+        <li><span class="step-num">3</span><h3>Confirma tu pedido</h3><p>Ajusta cantidades, confirma tu pedido y consúltalo en tu historial.</p></li>
       </ol>
     </section>
 
@@ -160,6 +161,7 @@
         <h3>Tu cuenta</h3>
         <button type="button" data-open="account-dialog">Iniciar sesión</button>
         <button type="button" data-open="cart-dialog">Ver carrito</button>
+        <button type="button" data-open="orders-dialog">Mis pedidos</button>
       </div>
     </div>
     <div class="footer-bottom"><span>© 2026 Tienda Digital</span><span>Proyecto académico · No procesa pagos reales</span></div>
@@ -196,6 +198,7 @@
       <p id="signed-email" class="muted"></p>
       <div class="signed-actions">
         <button id="signed-cart" class="btn btn-soft full" type="button" data-open="cart-dialog">Ver mi carrito</button>
+        <button id="signed-orders" class="btn btn-soft full" type="button" data-open="orders-dialog">Mis pedidos</button>
         <button id="logout-button" class="btn btn-ghost full" type="button">Cerrar sesión</button>
       </div>
       <p id="logout-status" class="form-status"></p>
@@ -210,9 +213,20 @@
     <p id="cart-status" class="form-status" aria-live="polite"></p>
   </dialog>
 
+  <dialog id="orders-dialog" class="modal cart-modal" aria-labelledby="orders-title">
+    <button class="close-modal" data-close="orders-dialog" aria-label="Cerrar" type="button"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <p class="eyebrow">Historial</p>
+    <h2 id="orders-title">Mis pedidos</h2>
+    <div id="orders-content"></div>
+  </dialog>
+
+  <dialog id="product-dialog" class="modal product-modal" aria-labelledby="product-title">
+    <button class="close-modal" data-close="product-dialog" aria-label="Cerrar" type="button"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+    <div id="product-detail"></div>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <!-- Ilustraciones de producto -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
       <g id="ic-headphones"><path d="M12 38v-6a20 20 0 0 1 40 0v6"/><rect x="9" y="36" width="10" height="18" rx="5"/><rect x="45" y="36" width="10" height="18" rx="5"/></g>
@@ -221,6 +235,10 @@
       <g id="ic-bottle"><path d="M27 8h10v7H27zM24 15h16l2 8v28a6 6 0 0 1-6 6H28a6 6 0 0 1-6-6V23z"/><path d="M22 32h20M22 42h20"/></g>
       <g id="ic-lamp"><path d="M18 14h28l8 20H10z"/><path d="M32 34v16M20 54h24"/><path d="M32 50v4"/></g>
       <g id="ic-mouse"><rect x="17" y="8" width="30" height="48" rx="15"/><path d="M32 8v16M17 26h30"/></g>
+      <g id="ic-speaker"><rect x="16" y="6" width="32" height="52" rx="10"/><circle cx="32" cy="38" r="10"/><circle cx="32" cy="38" r="3"/><circle cx="32" cy="18" r="3"/></g>
+      <g id="ic-notebook"><rect x="14" y="6" width="36" height="52" rx="5"/><path d="M22 6v52M30 18h12M30 26h12"/></g>
+      <g id="ic-charger"><rect x="16" y="10" width="32" height="46" rx="8"/><path d="m35 20-8 11h9l-8 11"/></g>
+      <g id="ic-webcam"><circle cx="32" cy="26" r="18"/><circle cx="32" cy="26" r="7"/><path d="M24 54h16M32 44v10"/></g>
       <g id="ic-product"><path d="M8 20 32 8l24 12v24L32 56 8 44z"/><path d="m8 20 24 12 24-12M32 32v24"/></g>
     </defs>
   </svg>
