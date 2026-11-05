@@ -22,11 +22,13 @@
         <span class="brand-name">Tienda<b>Digital</b></span>
       </a>
 
-      <form id="search-form" class="search" role="search">
+      <form id="search-form" class="search" role="search" autocomplete="off">
         <label class="sr-only" for="search-input">Buscar productos</label>
         <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
-        <input id="search-input" type="search" placeholder="Buscar audífonos, mochilas, teclados…" autocomplete="off">
+        <input id="search-input" type="search" placeholder="Buscar productos (presiona /)" role="combobox" aria-expanded="false" aria-controls="search-suggestions" aria-autocomplete="list">
+        <button id="search-clear" class="search-clear hidden" type="button" aria-label="Borrar búsqueda"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
         <button type="submit">Buscar</button>
+        <ul id="search-suggestions" class="suggestions hidden" role="listbox"></ul>
       </form>
 
       <div class="header-actions">
@@ -108,8 +110,29 @@
         </div>
       </div>
       <div id="category-filters" class="chips" role="group" aria-label="Filtrar por categoría"></div>
+      <div class="filter-bar">
+        <label class="check"><input id="filter-stock" type="checkbox"><span>Solo disponibles</span></label>
+        <label class="select-field">
+          <span>Precio</span>
+          <select id="filter-price">
+            <option value="all">Cualquier precio</option>
+            <option value="0-250">Hasta $250</option>
+            <option value="250-500">$250 a $500</option>
+            <option value="500-up">Más de $500</option>
+          </select>
+        </label>
+        <button id="clear-filters" class="link-button hidden" type="button" data-action="clear-filters">Limpiar filtros</button>
+      </div>
       <div id="product-grid" class="product-grid" aria-busy="true"></div>
       <p id="catalog-error" class="notice hidden" role="alert"></p>
+    </section>
+
+    <section id="recent-section" class="recent section-wrap hidden" aria-labelledby="recent-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Para retomar</p><h2 id="recent-title">Vistos recientemente</h2></div>
+        <button class="link-button" type="button" data-action="clear-recent">Borrar historial</button>
+      </div>
+      <div id="recent-list" class="recent-list"></div>
     </section>
 
     <section class="steps section-wrap" aria-label="Cómo funciona">
@@ -185,7 +208,11 @@
             <button type="button" id="toggle-pass" class="toggle-pass" aria-label="Mostrar contraseña">Mostrar</button>
           </span>
         </label>
-        <p class="hint">Usa una contraseña de al menos 10 caracteres.</p>
+        <div id="pass-strength" class="strength hidden" aria-live="polite">
+          <span class="strength-bar"><i></i></span>
+          <small id="pass-strength-text"></small>
+        </div>
+        <p class="hint" id="pass-hint">Usa una contraseña de al menos 10 caracteres.</p>
         <button class="btn btn-primary full" type="submit" id="auth-submit">Iniciar sesión</button>
         <p id="auth-status" class="form-status" aria-live="polite"></p>
       </form>
@@ -224,6 +251,8 @@
     <button class="close-modal" data-close="product-dialog" aria-label="Cerrar" type="button"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     <div id="product-detail"></div>
   </dialog>
+
+  <button id="back-to-top" class="back-to-top hidden" type="button" aria-label="Volver arriba"><svg viewBox="0 0 24 24"><path d="m6 14 6-6 6 6"/></svg></button>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

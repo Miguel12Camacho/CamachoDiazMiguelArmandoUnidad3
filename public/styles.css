@@ -545,3 +545,80 @@ textarea { resize: vertical; min-height: 96px; }
   .detail-art .shape svg { width: 58px; height: 58px; }
   .detail-body { padding: 24px 22px; }
 }
+
+.search-clear {
+  margin: 0 !important; padding: 6px !important; width: 30px; height: 30px; display: grid; place-items: center;
+  background: transparent !important; color: var(--muted) !important; border-radius: 50% !important;
+}
+.search-clear:hover { background: var(--sand) !important; }
+.search-clear svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+.suggestions {
+  position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 30; padding: 6px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+.suggestions li {
+  display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
+  padding: 8px; border-radius: 10px; cursor: pointer; font-size: 14px;
+}
+.suggestions li small { display: block; color: var(--muted); font-size: 12px; }
+.suggestions li.active, .suggestions li[role=option]:hover { background: var(--sand); }
+.suggestions .no-match { display: block; color: var(--muted); cursor: default; }
+
+.filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin: -4px 0 24px; }
+.check { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.check input { width: 18px; height: 18px; padding: 0; accent-color: var(--brand); }
+.select-field { display: inline-flex; flex-direction: row; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.select-field select {
+  border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 12px; background: var(--surface); font-size: 14px;
+}
+.link-button {
+  border: 0; background: transparent; color: var(--brand); font-size: 14px; font-weight: 650;
+  text-decoration: underline; text-underline-offset: 3px; padding: 4px;
+}
+.link-button:hover { color: var(--brand-hover); }
+
+.empty-state .btn { margin-top: 16px; }
+
+.recent { padding-top: 24px; }
+.recent-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.recent-card {
+  display: grid; grid-template-columns: 40px 1fr; grid-template-areas: "thumb name" "thumb price"; gap: 0 12px; align-items: center;
+  text-align: left; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 12px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.recent-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
+.recent-card .related-thumb { grid-area: thumb; }
+.recent-name { grid-area: name; font-size: 14px; font-weight: 650; }
+.recent-card strong { grid-area: price; font-size: 14px; color: var(--muted); }
+
+.add-button.added, .btn.added { background: var(--ok); }
+
+.strength { display: grid; gap: 6px; }
+.strength-bar { display: block; height: 6px; border-radius: 6px; background: var(--line); overflow: hidden; }
+.strength-bar i { display: block; height: 100%; width: 10%; border-radius: 6px; background: var(--danger); transition: width .25s, background .25s; }
+.strength small { font-size: 13px; color: var(--muted); }
+.strength.s1 .strength-bar i { width: 30%; background: #d9774a; }
+.strength.s2 .strength-bar i { width: 55%; background: #d4a72c; }
+.strength.s3 .strength-bar i { width: 78%; background: #7aa75a; }
+.strength.s4 .strength-bar i { width: 100%; background: var(--ok); }
+
+.progress-wrap { margin-top: 14px; }
+.progress { height: 8px; border-radius: 8px; background: var(--line); overflow: hidden; margin-top: 6px; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, #7aa75a, var(--ok)); border-radius: 8px; transition: width .3s; }
+
+.back-to-top {
+  position: fixed; right: 20px; bottom: 24px; z-index: 40; width: 46px; height: 46px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: var(--brand); color: #fff; box-shadow: var(--shadow);
+}
+.back-to-top:hover { background: var(--brand-hover); }
+.back-to-top svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 600px) {
+  .filter-bar { gap: 10px 16px; }
+  .recent-list { grid-template-columns: 1fr 1fr; }
+  .back-to-top { right: 14px; bottom: 16px; }
+}
+
+.search input[type="search"]::-webkit-search-cancel-button,
+.search input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }

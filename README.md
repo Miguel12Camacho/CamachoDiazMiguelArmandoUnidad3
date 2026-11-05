@@ -5,11 +5,12 @@ Aplicación web académica de comercio electrónico desarrollada con Node.js, Ex
 ## Funciones
 
 - Catálogo de productos desde PostgreSQL con búsqueda, filtros por categoría y ordenamiento.
-- Detalle de producto con productos relacionados.
+- Búsqueda con sugerencias en vivo (atajo `/`), filtros por disponibilidad y precio, y botón para limpiar filtros.
+- Detalle de producto con productos relacionados y lista de vistos recientemente.
 - Favoritos guardados por usuario.
-- Registro e inicio de sesión con contraseñas almacenadas mediante bcrypt.
+- Registro e inicio de sesión con contraseñas almacenadas mediante bcrypt e indicador de seguridad de la contraseña.
 - Sesiones con cookies `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
-- Carrito guardado en la base de datos con cantidades editables, envío calculado y opción de vaciarlo.
+- Carrito guardado en la base de datos con cantidades editables, barra de progreso de envío gratis, opción de deshacer al quitar un producto y de vaciarlo.
 - Confirmación de pedidos (simulada, sin pagos) con descuento de existencias en una transacción.
 - Historial de pedidos por usuario.
 - API propia con rutas `/api/...`.
