@@ -58,8 +58,10 @@ const sessionConfig = {
     maxAge: 1000 * 60 * 60 * 2
   }
 };
+const PgSession = require("connect-pg-simple")(session);
+
 if (isProduction) {
-  sessionConfig.store = require("connect-pg-simple")(session)({
+  sessionConfig.store = new PgSession({
     pool,
     tableName: "user_sessions",
     createTableIfMissing: true
